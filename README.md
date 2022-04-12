@@ -1,3 +1,3 @@
 # Isaacs-Code-Archive
-A little archive of mine.
+Welcome to a little archive of mine.
 Hope you enjoy :)
