@@ -1,0 +1,236 @@
+Script: local remote = game.ReplicatedStorage.Remotes.Combat
+
+remote.OnServerEvent:Connect(function(p,data)
+	if data.action == "slash" then
+		for i,player in pairs(game.Players:GetChildren()) do
+			if player ~= p then
+				remote:FireClient(player, data)
+			end
+		end
+	elseif data.action == "hit" then
+		remote:FireAllClients( data)
+		for i,v in pairs(data.hb) do
+			v.Humanoid:TakeDamage(5)
+
+			local bv = Instance.new("BodyVelocity", v.PrimaryPart)
+			bv.MaxForce = Vector3.new(99999,0,99999)
+			bv.Name = "v"
+			bv.P = 10
+			game.Debris:AddItem(bv,.2)
+			
+			if data.combo == 5 then
+				bv.Velocity = data.c.PrimaryPart.CFrame.LookVector * 50
+			else
+				bv.Velocity = data.c.PrimaryPart.CFrame.LookVector * 20
+			end
+			
+			local bv = Instance.new("BodyVelocity",data.c.PrimaryPart)
+			bv.MaxForce = Vector3.new(99999,0,99999)
+			bv.Name = "v"
+			bv.P = 10
+			game.Debris:AddItem(bv,.2)
+			if data.combo == 5 then
+				bv.Velocity = data.c.PrimaryPart.CFrame.LookVector * 50
+			else
+				bv.Velocity = data.c.PrimaryPart.CFrame.LookVector * 20
+			end 
+
+			local stun = Instance.new("BoolValue", v)
+			stun.Name = "Stun"
+			stun.Value = false
+			game.Debris:AddItem(stun,1)
+		end
+	end
+end)
+
+Local Script:
+local swingAnims = {
+	'rbxassetid://8897906050', --1
+	'rbxassetid://8898027214', --2
+	'rbxassetid://8898180039', --3
+	'rbxassetid://8898322850', --4
+	'rbxassetid://8898395211', --5
+}
+
+local textures = { -- Slash
+	'rbxassetid://8821193347', --1
+	'rbxassetid://8821230983', --2
+	'rbxassetid://8821246947', --3
+	'rbxassetid://8821254467', --4
+	'rbxassetid://8821272181', --5
+	'rbxassetid://8821280832', --6
+	'rbxassetid://8821300395', --7
+	'rbxassetid://8821311218', --8
+	'rbxassetid://8896641723', --9
+}  
+
+local t = game:GetService("TweenService")
+local rs = game:GetService("ReplicatedStorage")
+local uis = game:GetService("UserInputService")
+
+local resources = rs.Combat.Sword
+local fx = resources.Fx
+local remote = rs.Remotes.Combat
+
+local p = game.Players.LocalPlayer
+local c = script.Parent
+local hrp = c.HumanoidRootPart
+local combo = 1
+local lasthit = 0
+local cd = false
+
+local anim = script:WaitForChild("Animation")
+
+local function setUp(char)
+	local handle = fx.Handle:Clone()
+	handle.Parent = char
+	local m6d = Instance.new("Motor6D", handle)
+	m6d.Part0 = char.RightHand
+	m6d.Part1 = handle
+	m6d.C1 = CFrame.new(0,.125,0)
+	local model = fx.MeshPart:Clone()
+	model.Parent = workspace.Fx
+	local weld = Instance.new("Weld", model)
+	weld.Part0 = handle
+	weld.Part1 = model
+	weld.C1 = CFrame.new(0,-2.2,0) * CFrame.Angles(math.rad(90),0,0)
+end
+
+for i,v in pairs(game.Players:GetChildren()) do
+	repeat wait() until v.Character
+	setUp(v.Character)
+	v.CharacterAdded:Connect(function(char)
+		char:WaitForChild("RightHand")
+		setUp(char)
+	end)
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(char)
+		char:WaitForChild("RightHand")
+		setUp(char)
+	end)
+end)
+
+local function slash(char, comboN)
+	local m = fx.Slash:Clone()
+	local hrp = char.HumanoidRootPart
+	
+	if comboN == 1 then
+		wait(.2)
+		m.CFrame = hrp.CFrame * CFrame.new(0,0,-3) * CFrame.Angles(0,math.rad(-30),math.rad(-240))
+		t:Create(m, TweenInfo.new(.5), {CFrame = m.CFrame * CFrame.Angles(0,math.rad(-100),0), Transparency = 1}):Play()
+	elseif comboN == 2 then
+		wait(.2)
+		m.CFrame = hrp.CFrame * CFrame.new(0,0,-3) * CFrame.Angles(0,math.rad(30),math.rad(0))
+		t:Create(m, TweenInfo.new(.5), {CFrame = m.CFrame * CFrame.Angles(0,math.rad(-100),0), Transparency = 1}):Play()
+	elseif comboN == 3 then
+		wait(.3)
+		m.CFrame = hrp.CFrame * CFrame.new(0,0,-3) * CFrame.Angles(0,math.rad(30),math.rad(-15))
+		t:Create(m, TweenInfo.new(.5), {CFrame = m.CFrame * CFrame.Angles(0,math.rad(-100),0), Transparency = 1}):Play()
+	elseif comboN == 4 then
+		wait(.4)
+		m.CFrame = hrp.CFrame * CFrame.new(0,0,-3) * CFrame.Angles(0,math.rad(30),math.rad(235))
+		t:Create(m, TweenInfo.new(.5), {CFrame = m.CFrame * CFrame.Angles(0,math.rad(-100),0), Transparency = 1}):Play()
+	elseif comboN == 5 then
+		wait(.4)
+		m.CFrame = hrp.CFrame * CFrame.new(0,0,-6) * CFrame.Angles(0,math.rad(30),math.rad(0))
+		t:Create(m, TweenInfo.new(.5), {CFrame = hrp.CFrame * CFrame.new(0,0,-10) * CFrame.Angles(0,math.rad(-100),0), Transparency = 1}):Play()
+	end
+	t:Create(m.light, TweenInfo.new(.4), {Brightness = 0}):Play()
+	
+	local count = 1
+	
+	local connection
+	connection = game["Run Service"].RenderStepped:Connect(function()
+		m.Mesh.TextureId = textures[count]
+		count = count + 1
+		if count > #textures then
+			count = 1
+			connection:Disconnect()
+		end
+	end)
+	
+	m.Parent = workspace.Fx
+	
+	if char == c then
+		local hb = Instance.new("Part", workspace.Fx)
+		hb.Size = Vector3.new(10,3,7)
+		hb.CFrame = hrp.CFrame * CFrame.new(0,0,-5)
+		hb.Anchored = true
+		hb.CanCollide = false
+		hb.Transparency = .6
+		hb.Name = "hb"
+		hb.Material = Enum.Material.ForceField
+		hb.CanQuery = false
+
+		local con
+		con = hb.Touched:Connect(function()
+			con:Disconnect()
+		end)
+
+		local hits = {}
+		for i,v in pairs(hb:GetTouchingParts()) do
+			if v:IsDescendantOf(char) == false then
+				if v.Parent:FindFirstChildWhichIsA("Humanoid") and table.find(hits, v.Parent) == nil then
+
+					table.insert(hits, v.Parent)
+
+				end
+			end
+		end
+		
+		if #hits == 0 then
+			local bv = Instance.new("BodyVelocity",char.PrimaryPart)
+			bv.MaxForce = Vector3.new(99999,0,99999)
+			bv.Name = "v"
+			bv.P = 10
+			game.Debris:AddItem(bv,.2)
+			if comboN == 5 then
+				bv.Velocity = char.PrimaryPart.CFrame.LookVector * 50
+			else
+				bv.Velocity = char.PrimaryPart.CFrame.LookVector * 20
+			end
+		end
+		
+		local data = {hb = hits, action = "hit", combo = comboN, c = char}
+		remote:FireServer(data)
+
+		hb:Destroy()
+	end
+end
+
+uis.InputBegan:Connect(function(input, gpe)
+	if gpe then return end
+	if input.UserInputType == Enum.UserInputType.MouseButton1 and cd == false and c:FindFirstChild("Stun") == nil then
+		
+		c.Humanoid.WalkSpeed = 0
+		c.Humanoid.JumpHeight = 0
+		
+		if tick() - lasthit > 1 then
+			combo = 1
+		end
+		lasthit = tick()
+		
+		cd = true
+		
+		anim.AnimationId = swingAnims[combo]
+		local load = c.Humanoid:LoadAnimation(anim):Play()
+		
+		local data = {char = c, comboN = combo, action = "slash"}
+		remote:FireServer(data)
+		slash(c, combo)
+		
+		if combo == 5 then
+			combo = 1
+		else
+			combo = combo + 1
+		end
+		wait(.1)
+		
+		cd = false
+		
+		c.Humanoid.WalkSpeed = 16
+		c.Humanoid.JumpHeight = 7.2
+	end
+end)
