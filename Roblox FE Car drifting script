@@ -1,0 +1,2 @@
+-- FE Car drifting script ( DOES NOT GIVE YOU THE CAR JUST THE ANIMATION SITTING INSIDE AND MORE! )
+loadstring(game:HttpGet('https://raw.githubusercontent.com/MonkoTubeYT/carscript/master/!carscript.lua',true))()
