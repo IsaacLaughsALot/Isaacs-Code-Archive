@@ -1,0 +1,7 @@
+game.Players.PlayerAdded:Connect(function(plr)
+    plr.CharacterAdded:Connect(function(char)
+        wait(3)
+        char.Animate.walk.WalkAnim.AnimationId = "rbxassetid://5620305516"
+        char.Animate.run.RunAnim.AnimationId = "rbxassetid://5620305516"
+    end)
+end)
