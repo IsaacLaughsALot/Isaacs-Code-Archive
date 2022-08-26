@@ -1,0 +1,70 @@
+local Player = script.Parent.Parent.Parent
+local Content = script.Parent.MainFrame.ScrollingFrame.Content
+local Characters = game.ReplicatedStorage.Characters
+local SetSubject = Characters.Parent.SetSubject
+ 
+for index,item in pairs(Characters:GetChildren()) do
+    if item:FindFirstChild("Humanoid") then
+        local ViewportFrame = Instance.new("ViewportFrame")
+        ViewportFrame.Parent = Content
+        ViewportFrame.BackgroundTransparency = 1
+        
+        local Button = Instance.new("TextButton")
+        Button.Parent = ViewportFrame
+        Button.Position = UDim2.new(0,0,1,0)
+        Button.Size = UDim2.new(1,0,0,15)
+        Button.BorderSizePixel = 0
+        Button.BackgroundColor3 = Color3.fromRGB(255,255,255)
+        Button.Text = "Spawn"
+        Button.TextScaled = true
+        
+        local Preview = item:Clone()
+        Preview.Parent = ViewportFrame
+        
+        local Camera = Instance.new("Camera")
+        Camera.Parent = ViewportFrame
+        Camera.CFrame = Preview.Head.CFrame + Preview.Head.CFrame.LookVector * 5
+        Camera.CFrame = CFrame.new(Camera.CFrame.Position,Preview.Head.Position)
+        
+        ViewportFrame.CurrentCamera = Camera
+        
+        Button.MouseButton1Down:Connect(function()
+            script.Parent.Enabled = false
+            local ChosenCharacter = item:Clone()
+            local CurrentCharacter = Player.Character
+            local LocalScripts = {}
+            
+            for index2,item2 in pairs(game.StarterPlayer.StarterCharacterScripts:GetChildren()) do
+                if item2:IsA('LocalScript') then
+                    table.insert(LocalScripts,item2:Clone())
+                else
+                    item2:Clone().Parent = ChosenCharacter
+                end
+            end
+            
+            CurrentCharacter.Health:Clone().Parent = ChosenCharacter
+            table.insert(LocalScripts,CurrentCharacter.Animate:Clone())     
+            ChosenCharacter.Parent = workspace
+            Player.Character = ChosenCharacter
+            for index2,item2 in pairs(LocalScripts) do
+                item2.Parent = ChosenCharacter
+            end 
+            SetSubject:FireClient(Player,ChosenCharacter.Humanoid)
+            
+            local Connection
+            
+            local function onDied()
+                wait(game.Players.RespawnTime)
+                Player:LoadCharacter()
+                script.Parent.Enabled = true
+                if Connection then
+                    Connection:Disconnect()
+                end
+            end
+            
+            Connection = ChosenCharacter.Humanoid.Died:Connect(onDied)
+            
+        end)
+        
+    end
+end
